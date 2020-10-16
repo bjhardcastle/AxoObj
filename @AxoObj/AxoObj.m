@@ -69,10 +69,6 @@ classdef AxoObj < handle_light
                         
             % Some defaults for what each channel corresponds to 
             % (to modify these, assign different values in a subclass constructor)
-            
-%             obj.TrialMark1 = 2; % data row 2 = channel IN0
-%             obj.TrialMark2 = 7; % data row 7 = channel IN8
-%             
         end
       
     end
@@ -85,7 +81,6 @@ classdef AxoObj < handle_light
         
         function Abf = get.Abf(obj)
             Abf =  getAbfData(obj);
-
         end
         
     end
