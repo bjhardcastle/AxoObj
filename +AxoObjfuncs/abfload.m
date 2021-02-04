@@ -689,7 +689,7 @@ switch h.nOperationMode
     tmp=1e-6*h.lActualAcqLength*h.fADCSampleInterval;
     if verbose
 %       disp(['total length of recording: ' num2str(tmp,'%5.1f') ' s ~ ' num2str(tmp/60,'%3.0f') ' min']);
-%       disp(['sampling interval: ' num2str(h.si,'%5.0f') ' µs']);
+%       disp(['sampling interval: ' num2str(h.si,'%5.0f') ' Âµs']);
       % 8 bytes per data point expressed in Mb
 %       disp(['memory requirement for complete upload in matlab: '...
 %         num2str(round(8*h.lActualAcqLength/2^20)) ' MB']);
@@ -808,14 +808,8 @@ if ~isempty(h.tags) && isfield(h,'sweepStartInPts')
     h.tags(i).episodeIndex=tmp(end);
   end
 end
-%%%%%Modified%%%%%%%%%%%%%%################################################
-%%%%%#### MK for 8 channels
-data=zeros(size(d,1),size(d,2)+1);
- data(:,1) = 1*(0:size(d,1)-1);
- data(:,2:8)=d(:,1:7);
- d=data;
-%  disp(size(data));
-%  disp(size(d));
+
+d=squeeze(d);
 
 
 % ########################################################################
