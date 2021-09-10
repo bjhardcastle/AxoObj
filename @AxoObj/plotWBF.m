@@ -1,4 +1,4 @@
-function varargout = plotSumWBA(objarray, fields, errorbar, plotcolor, tfig,preSec,postSec)
+function varargout = plotWBF(objarray, fields, errorbar, plotcolor, tfig,preSec,postSec )
 %PLOTTRIALS Find all trials with certain fields, and plot their aligned, averaged time-series.
 % [figHandle,axHandle] = plotTrials(objarray, ROIindex, fields, errorbar, plotcolor, figHandle)
 %
@@ -60,7 +60,7 @@ end
 
 
 % Setup the figure for plotting traces:
-if nargin >= 5 && ishghandle(tfig)
+if nargin >= 5 && ~isempty(tfig) && ishghandle(tfig)
     set(tfig, 'color', [1 1 1] )
     if isempty( tfig.CurrentAxes )
         taxes = axes(tfig);
@@ -107,14 +107,14 @@ end
 
 
 % Get the intensity time-series for the requested trials
-[deltaArray, sumArray, timeVector, respIdx] = findResponseArray(objarray, fields, preSec, postSec);
+[deltaArray, sumArray, timeVector, respIdx,wbfArray] = findResponseArray(objarray, fields, preSec, postSec);
 
 
 if ~isempty(timeVector) % Only start plotting if some trials and their F0 values were returned
     
      
     % Get the mean trial timeseries:
-    meanTrials = nanmean(sumArray , 1);
+    meanTrials = nanmean(wbfArray , 1);
     
     switch errorbar
         
@@ -127,7 +127,7 @@ if ~isempty(timeVector) % Only start plotting if some trials and their F0 values
             flies = [objarray.Fly];
             if isempty(flies)
                 disp('No Fly numbers assigned: errorbar will be +/- STD of all trials')
-                varTrials = nanstd(sumArray , [] , 1) ;
+                varTrials = nanstd(wbfArray , [] , 1) ;
             else % Some additional processing for SEM 
 			
 				% Convert repIdx for each trial from 'obj number' to 'fly number' 
@@ -138,9 +138,9 @@ if ~isempty(timeVector) % Only start plotting if some trials and their F0 values
 				populationSize = length(included_flies);			
 				
 				% Get individual fly mean-traces
-				fly_mean_traces = nan(populationSize,size(sumArray,2));
+				fly_mean_traces = nan(populationSize,size(wbfArray,2));
 				for ifidx = 1:populationSize
-					fly_mean_traces(ifidx,:) = nanmean( sumArray( (TrialFlyNum == included_flies(ifidx)), : ) , 1);
+					fly_mean_traces(ifidx,:) = nanmean( wbfArray( (TrialFlyNum == included_flies(ifidx)), : ) , 1);
 				end
 				
 				% Work on these mean-traces to get STD (then SEM) and the mean trace again
@@ -160,14 +160,14 @@ if ~isempty(timeVector) % Only start plotting if some trials and their F0 values
             
             % For narrower traces, choose a lighter color:
             brightcolor = linecolor+(1-linecolor)*0.55;
-                        
+            
             brightcolor(4) = 0.3; % alpha 
             linecolor(4) = 0.3; % alpha 
             meanwidth = 2;
             tracewidth = 0.5*meanwidth;
             
             % Plot individual traces:
-            plot(taxes, timeVector, sumArray, 'color', brightcolor, 'LineWidth', tracewidth);
+            plot(taxes, timeVector, wbfArray, 'color', brightcolor, 'LineWidth', tracewidth);
             % Plot their mean:
             plot(taxes, timeVector, meanTrials, 'color', linecolor, 'LineWidth', meanwidth)
             
@@ -175,7 +175,7 @@ if ~isempty(timeVector) % Only start plotting if some trials and their F0 values
     end
     
     % Whichever was plot, set axis labels
-    taxes.YLabel.String = ('L + R');
+    taxes.YLabel.String = ('Hz');
     taxes.XLabel.String = ('Time [s]');
     
     % Store axes limits

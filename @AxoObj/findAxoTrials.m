@@ -47,7 +47,7 @@ function trialIdx = findAxoTrials(obj,fields)
 % See also plotTrials, findRespArray, findF0.
 
 if isempty(obj.TrialStartSample)
-    getTrialtimes(obj);
+    getAxoTrials(obj);
 end
 
 if nargin < 2 || isempty(fields)

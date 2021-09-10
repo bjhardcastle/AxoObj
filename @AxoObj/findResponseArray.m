@@ -1,4 +1,4 @@
-function [deltaArray, sumArray, timeVector, ObjIdx] = findResponseArray(objarray, fields)
+function [deltaArray, sumArray, timeVector, ObjIdx,wbfArray] = findResponseArray(objarray, fields, preSec, postSec)
 
 %FINDRESPARRAY Extract the aligned, interpolated response time-series for
 %all trials which match the specified parameters, across an object array
@@ -14,6 +14,12 @@ function [deltaArray, sumArray, timeVector, ObjIdx] = findResponseArray(objarray
 %
 % See also findTrials.
 
+if nargin < 4 || isempty(postSec)
+   postSec = 0; 
+end
+if nargin < 3 || isempty(preSec)
+   preSec = 0; 
+end
 if nargin < 2 || isempty(fields)
     disp('''fields'' is empty. All trials will be returned.')
     fields = struct;
@@ -27,6 +33,7 @@ ObjIdx = []; % Store the object index from which each trial was taken
 delta_trials_returned = [];
 sum_trials_returned = [];
 timevec_returned = [];
+freq_trials_returned = [];
 for oidx = 1:length(objarray)
     
     if isempty( objarray(oidx).TrialPatNum )
@@ -42,20 +49,26 @@ for oidx = 1:length(objarray)
         % Get trial data
         tcount = tcount + 1;
         
-        deltawba = getDeltaWBA(objarray(oidx), tidx);
+        [deltawba,timeVec] = getDeltaWBA(objarray(oidx), tidx,preSec,postSec);
         if length(deltawba) > size(delta_trials_returned,2)
             delta_trials_returned(:,end+1:length(deltawba)) = nan;
         end
         delta_trials_returned( tcount , 1:length(deltawba) ) = deltawba;
         
-        [sumwba,timevec] = getSumWBA(objarray(oidx), tidx);
+        [sumwba,timevec] = getSumWBA(objarray(oidx), tidx,preSec,postSec);
         if length(sumwba) > size(sum_trials_returned,2)
             sum_trials_returned(:,end+1:length(sumwba)) = nan;
         end
         sum_trials_returned( tcount , 1:length(sumwba) ) = sumwba;
-        
-        if length(timevec) > length(timevec_returned)
-            timevec_returned = timevec;
+           
+        [wbf,timevec] = getWBF(objarray(oidx), tidx,preSec,postSec);
+        if length(sumwba) > size(freq_trials_returned,2)
+            freq_trials_returned(:,end+1:length(wbf)) = nan;
+        end
+        freq_trials_returned( tcount , 1:length(wbf) ) = wbf;
+       
+        if length(timeVec) > length(timevec_returned)
+            timevec_returned = timeVec;
         end
         
         % Store the index of the object for the trial
@@ -70,5 +83,5 @@ end
 deltaArray = delta_trials_returned;
 sumArray = sum_trials_returned;
 timeVector = timevec_returned;
-
+wbfArray = freq_trials_returned;
 

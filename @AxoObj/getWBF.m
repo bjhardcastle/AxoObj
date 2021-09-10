@@ -1,4 +1,4 @@
-function [trialwba,timeVec] = getSumWBA(obj,trialidx,preSec,postSec)
+function [trialwbf,timeVec] = getWBF(obj,trialidx,preSec,postSec)
 
 % For orientation grating experiments:
 % |  bar tracking  | bar disappears, grating static | grating motion |
@@ -19,9 +19,10 @@ end
 startSample = obj.TrialStartSample(trialidx) - floor(preSec*obj.AbfRate);% - floor(2*obj.AbfRate);
 endSample = obj.TrialEndSample(trialidx) + floor(postSec*obj.AbfRate);% + floor(2*obj.AbfRate);
 
-dataL = obj.Abf(startSample:endSample,obj.chanL);
-dataR = obj.Abf(startSample:endSample,obj.chanR);
+trialwbf = obj.Abf(startSample:endSample,obj.chanWingFreq);
 
-trialwba = dataL + dataR;
+% convert voltage to frequency (wing beats per sec)
+% this is a complete guess for now:
+trialwbf = trialwbf*500/5;
 
-timeVec = linspace(1/obj.AbfRate,length(trialwba)/obj.AbfRate,length(trialwba) );
+timeVec = linspace(1/obj.AbfRate,length(trialwbf)/obj.AbfRate,length(trialwbf) );

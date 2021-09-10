@@ -44,6 +44,7 @@ for oidx = 1:length(objarray)
     
     % Main code:
     
+    
     % Find trial times in Abf signal with settings specified:
     [trystarts, tryends] = detectAxoTrials(objarray(oidx),ts);
     

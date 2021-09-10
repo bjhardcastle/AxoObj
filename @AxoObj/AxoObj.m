@@ -1,7 +1,7 @@
 classdef AxoObj < handle_light
     
     properties (Dependent, Hidden)        
-        Abf % Data extracted from .abf file on-demand (hidden to avoid fetching any time obj is examined in command window)
+       % Abf % Data extracted from .abf file on-demand (hidden to avoid fetching any time obj is examined in command window)
     end
     properties (Dependent)
         Link
@@ -14,8 +14,12 @@ classdef AxoObj < handle_light
         Folder % folder path
         AbfFile % filename plus extension
         
+        Abf
+        
         AbfRate  % sampling rate of axoscope data
         AbfInfo % structure 'h' returned from 'abfload.m'
+        
+        pSet % from parameter file
         
         Unattended = 0
         
@@ -38,6 +42,13 @@ classdef AxoObj < handle_light
         TrialYpos  % obj.Abf(:,4)
         
         SwitchPatSeqAbfChans
+
+        chanL = 4;
+        chanR = 5;
+        chanWingFreq = 6;
+       
+
+        
     end
     
     properties (Transient)
@@ -79,9 +90,9 @@ classdef AxoObj < handle_light
             Link = ['<a href="matlab:winopen(''' obj.Folder ''')">open folder</a>'];
         end
         
-        function Abf = get.Abf(obj)
-            Abf =  getAbfData(obj);
-        end
+%         function Abf = get.Abf(obj)
+%             Abf =  getAbfData(obj);
+%         end
         
     end
     
@@ -89,17 +100,20 @@ classdef AxoObj < handle_light
        
         obj = getAbfPath(obj,pathIN) % runs with constructor upon object creation
         [Abf,AbfRate,AbfInfo] = getAbfData(obj); % Read abf file    
+        getParameterFile(obj)
         getAxoTrials(objarray)
         [trystarts, tryends] = detectAxoTrials(obj,trialsettings)
         varargout = checkTrials(obj , trialsettings, trialstarts, trialends)
         getTrialParameters(obj)
         chanGains = detectAxoTrialGains(obj, chanIdx, panels_refresh_rate)
         trialIdx = findAxoTrials(obj,fields)
-        [deltaArray, sumArray, timeVector, ObjIdx] = findResponseArray(objarray, fields)
-        [trialwba,timeVec] = getDeltaWBA(obj,trialidx)
-        [trialwba,timeVec] = getSumWBA(obj,trialidx)
-        varargout = plotDeltaWBA(objarray, fields, errorbar, plotcolor, tfig)
-        varargout = plotSumWBA(objarray, fields, errorbar, plotcolor, tfig)
+        [deltaArray, sumArray, timeVector, ObjIdx,wbfArray] = findResponseArray(objarray, fields,preSec,postSec)
+        [trialwba,timeVec,extraChanData] = getDeltaWBA(obj,trialidx,preSec,postSec,extraChanIdx)
+        [trialwba,timeVec] = getSumWBA(obj,trialidx, preSec,postSec)
+        [trialwbf,timeVec] = getWBF(obj,trialidx,preSec,postSec)
+        varargout = plotDeltaWBA(objarray, fields, errorbar, plotcolor, tfig, preSec,postSec)
+        varargout = plotSumWBA(objarray, fields, errorbar, plotcolor, tfig,preSec,postSec)
+        varargout = plotWBF(objarray, fields, errorbar, plotcolor, tfig, preSec,postSec)
 
     end
     

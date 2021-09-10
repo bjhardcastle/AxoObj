@@ -1,4 +1,4 @@
-function varargout = plotDeltaWBA(objarray, fields, errorbar, plotcolor, tfig)
+function varargout = plotDeltaWBA(objarray, fields, errorbar, plotcolor, tfig,preSec,postSec )
 %PLOTTRIALS Find all trials with certain fields, and plot their aligned, averaged time-series.
 % [figHandle,axHandle] = plotTrials(objarray, ROIindex, fields, errorbar, plotcolor, figHandle)
 %
@@ -42,6 +42,12 @@ function varargout = plotDeltaWBA(objarray, fields, errorbar, plotcolor, tfig)
 % See also findTrials, findRespArray
 import 'AxoObjfuncs.*'
 
+if nargin < 7 || isempty(postSec)
+   postSec = 0; 
+end
+if nargin < 6 || isempty(preSec)
+   preSec = 0; 
+end
 if nargin < 4 || isempty(plotcolor)
     plotcolor = []; % No color is specified for the trace - will be chosen automatically
 end
@@ -54,7 +60,7 @@ end
 
 
 % Setup the figure for plotting traces:
-if nargin == 5 && ishghandle(tfig)
+if nargin >= 5 && ~isempty(tfig) && ishghandle(tfig)
     set(tfig, 'color', [1 1 1] )
     if isempty( tfig.CurrentAxes )
         taxes = axes(tfig);
@@ -101,7 +107,7 @@ end
 
 
 % Get the intensity time-series for the requested trials
-[deltaArray, sumArray, timeVector, respIdx] = findResponseArray(objarray, fields);
+[deltaArray, sumArray, timeVector, respIdx] = findResponseArray(objarray, fields, preSec, postSec);
 
 
 if ~isempty(timeVector) % Only start plotting if some trials and their F0 values were returned
@@ -142,7 +148,7 @@ if ~isempty(timeVector) % Only start plotting if some trials and their F0 values
 				meanTrials = nanmean(fly_mean_traces,1);
             end
             
-            lineprops.col = {linecolor};
+            lineprops.col = {linecolor,0.8};
             lineprops.edgestyle = ':';
             
             % Plot
@@ -155,6 +161,8 @@ if ~isempty(timeVector) % Only start plotting if some trials and their F0 values
             % For narrower traces, choose a lighter color:
             brightcolor = linecolor+(1-linecolor)*0.55;
             
+            brightcolor(4) = 0.3; % alpha 
+            linecolor(4) = 0.3; % alpha 
             meanwidth = 2;
             tracewidth = 0.5*meanwidth;
             
