@@ -1,4 +1,14 @@
-#*.*
+# Ignore everything:
+*.* 
+
+# ..then manually add filetypes to be tracked:
+!/readme.md
+!/license.txt
+!/*.m*
+!/@AxoObj/*.m*
+!/@AxoObj/private/*.m*
+!/+AxoObjfuncs/*.m*
+
 #!/readme.md
 #!/license.txt
 #!/addToPath.m
